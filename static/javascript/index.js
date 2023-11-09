@@ -86,7 +86,7 @@ function logoutButton() {
     $('#logout-button').click(function () {
         $.ajax({
             type: 'post',
-            url: 'http://localhost:5000/logout/',
+            url: 'http://localhost:5000/logout',
             async: true,
             success: function (data) {
                 if (data['success'] == 1) {
@@ -151,14 +151,14 @@ function login(email, password) {
     })
     $.ajax({
         type: 'post',
-        url: 'http://localhost:5000/login/',
+        url: 'http://localhost:5000/login',
         async: true,
         success: function (data) {
             if (data['success'] == 1) {
                 $('#login-modal').modal('hide')
                 username = data['username']
                 alert('欢迎你'+username)
-                window.location.reload()
+//                window.location.reload()
             } else {
                 $('#passwordError').text('邮箱地址或密码错误')
             }
@@ -205,7 +205,7 @@ function checkEmail() {
     $('#EmailRegister').bind('change', function () {
         $.ajax({
             type: 'post',
-            url: 'http://localhost:5000/checkemail/',
+            url: 'http://localhost:5000/checkemail',
             async: true,
             data: {
                 email: $('#EmailRegister').val()
@@ -228,32 +228,32 @@ function checkEmail() {
 
 
 // 检查session判断是否登录了，然后来渲染页面
-// function checkSession() {
-//     $.ajax({
-//         'url':'http://localhost:5000/checkSession/',
-//         type:'post',
-//         async:true,
-//         success:function (data) {
-//             if (data['success']==1){
-//                 changeLoginOrLogout(data)
-//             }else {
-//
-//             }
-//         }
-//     })
-// }
+ function checkSession() {
+     $.ajax({
+         'url':'http://localhost:5000/checkSession',
+         type:'post',
+         async:true,
+         success:function (data) {
+             if (data['success']==1){
+                 changeLoginOrLogout(data)
+             }else {
+
+             }
+         }
+     })
+ }
 
 
 // 监听开始考试
 function startExam() {
     $('#left-button').click(function () {
         $.ajax({
-            url:'http://localhost:5000/checkSession/',
+            url:'http://localhost:5000/checkSession',
             type:'post',
             async: true,
             success:function (data) {
                 if (data['success']==1) {
-                    window.location.href = "http://localhost:5000/exam/"
+                    window.location.href = "http://localhost:5000/exam"
                 }else {
                     $('#login-modal').modal('show')
                 }

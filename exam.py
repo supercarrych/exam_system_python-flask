@@ -21,6 +21,23 @@ class ExamQuestion:
         self.issues_count = issues_count
         self.my_solution = my_solution
 
+    # 返回字典
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'type': self.type,
+            'type_desc': self.type_desc,
+            'question': self.question,
+            'options': self.options,
+            'solution': self.solution,
+            'analysis': self.analysis,
+            'paper_name': self.paper_name,
+            'paper_bonus': self.paper_bonus,
+            'nth': self.nth,
+            'issues_count': self.issues_count,
+            'my_solution': self.my_solution
+        }
+
     # 设置id
     def set_id(self, id):
         self.id = id

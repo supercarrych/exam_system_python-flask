@@ -105,15 +105,21 @@
             <strong>一、单项选择题(本类题共 24 小题，每小题 1.5 分，共 36 分。每小题备选答案中，只有一个符合题意的正确答案。多选、错选、不选均不得分。)</strong>
 
             {% for q in question %}
-                {% if q.get('q_type')=='radio' %}
+                {% if q.type==1 %}
                     <div class="p-3 mb-2 bg-info text-white rounded">
-                        <p>{{ q.q_text }}</p>
-                        <input type="radio" name="{{ q.id }}" value="A"> {{ q.A }}<br>
-                        <input type="radio" name="{{ q.id }}" value="B"> {{ q.B }}<br>
-                        <input type="radio" name="{{ q.id }}" value="C"> {{ q.C }}<br>
-                        <input type="radio" name="{{ q.id }}" value="D"> {{ q.D }}<br>
+                        <p>{{ q.question }}</p>
+                        {% with opt=q.options %}
+                        {{opt}}
+                        <input type="checkbox" name="{{ opt.A }}" value="A"> {{ q.options["A"] }}<br>
+                        <input type="checkbox" name="{{ opt.B }}" value="B"> {{ q.options.A }}<br>
+                        <input type="checkbox" name="{{ opt.C }}" value="C"> {{ opt["A"] }}<br>
+                        <input type="checkbox" name="{{ opt.D }}" value="D"> {{ opt.D }}<br>
                         <br>
+                        {% endwith %}
                     </div>
+                    {{q.solution}}
+                    {{q.analysis}}
+                    {{q.nth}}/{{q.issues_count}}
                 {% endif %}
 
             {% endfor %}

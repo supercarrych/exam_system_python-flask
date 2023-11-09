@@ -21,6 +21,7 @@ class ExamHelper:
         self.question_id = self.db.get_all_id(table_name)
 
 
+
     def getData(self, table_name, question_id):
         query = (("SELECT question, solution FROM {} WHERE id = %s").format(table_name))
 
@@ -29,6 +30,7 @@ class ExamHelper:
 
     def analyze(self):
         lists = []
+
         for i in self.question_id:
             exam = self.db.get_data(table_name, i)
             lists.append({'question': exam.question, 'items': exam.options})

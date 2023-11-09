@@ -1,6 +1,7 @@
 import json
 import os
 import random
+from datetime import timedelta
 
 from flask import Flask, render_template, request, jsonify, session
 # from flask_uploads import configure_uploads, UploadSet
@@ -12,14 +13,10 @@ from analyze import ExamHelper
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 app.config['SECRET_KEY'] = os.urandom(24)
-
-db = DatabaseHelper()
-cursor = db.get_cursor()
 paper_id = ''
 user_name = ''
-
-exam = ExamHelper()
-
+db = DatabaseHelper()
+cursor = db.get_cursor()
 
 # app.config['UPLOADS_DEFAULT_DEST'] = 'D:/'  # 这里指定的是 DEFAULT 这个集合里面类型的文件 存放在什么地方
 # app.config['UPLOADS_DEFAULT_URL'] = 'http://127.0.0.1/uploadfile/'
@@ -29,10 +26,11 @@ exam = ExamHelper()
 
 @app.route('/')
 def index():
+
     return render_template('index.html')
 
 
-@app.route('/login/', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
         return 'GET'
@@ -57,7 +55,7 @@ def login():
         return jsonify(data)
 
 
-@app.route('/checkemail/', methods=['GET', 'POST'])
+@app.route('/checkemail', methods=['GET', 'POST'])
 def checkEmail():
     if request.method == 'GET':
         return 'GET'
@@ -97,43 +95,37 @@ def register():
         return json_data
 
 
-@app.route('/logout/', methods=['POST'])
+@app.route('/logout', methods=['POST'])
 def logout():
     session.clear()
     return jsonify({'success': 1})
 
 
-@app.route('/checkSession/', methods=['POST'])
+@app.route('/checkSession', methods=['POST'])
 def checkSession():
+    print('checkSession')
+    session['user_id'] = '8'
+    print(session.get('user_id'))
     user_id = session.get('user_id')
     if user_id:
         sql = 'select realname from users where id=%s'
         cursor.execute(sql, (user_id,))
-        return jsonify({'success': 1, 'username': cursor.fetchone().get('name')})
+        return jsonify({'success': 1, 'username': cursor.fetchone()[0]})
     return jsonify({'success': 0})
 
 
-@app.route('/exam/')
+@app.route('/exam')
 def exam():
+    print(session.get('user_id'))
+    session['user_id'] = '8'
     if session.get('user_id'):
-        global paper_id, user_name
-        sql = 'select count(*) as total from docx'
-        cursor.execute(sql)
-        count = cursor.fetchone().get('total')
-        sql = 'select * from questions where paper_id = %s'
+        items = db.get_all_id(table_name='question')
+        questions = []
+        for i in items:
+            items = db.get_data('question', i)
+            questions.append(items.to_dict())
 
-        random_paper_id = random.randint(1, count)
-        paper_id = random_paper_id
-
-        cursor.execute(sql, (paper_id,))
-        res = cursor.fetchall()
-
-        user_id = session.get('user_id')
-        sql = 'select * from users where id=%s'
-        cursor.execute(sql, user_id)
-        user_name = cursor.fetchone().get('realname')
-
-        return render_template('exam.html', question=res)
+        return render_template('exam.html', question=questions)
     else:
         return render_template('temp.html')
 
@@ -144,13 +136,13 @@ def my_context():
     if user_id:
         sql = 'select realname from users where id = %s'
         cursor.execute(sql, (user_id,))
-        name = cursor.fetchone().get('realname')
+        name = cursor.fetchone()[0]
         return {'name': name, }
     else:
         return {}
 
 
-@app.route('/admin/')
+@app.route('/admin')
 def admin():
     if session.get('user_id') == 1:
         sql = 'select * from user_grade order by user_name,paper_id'
@@ -162,13 +154,15 @@ def admin():
         return render_template('temp.html')
 
 
-@app.route('/analyze/', methods=['post'])
+@app.route('/analyze', methods=['get'])
 def analyze_word():
-    res = ExamHelper.analyze()
+    exam_item = ExamHelper()
+    exam_item.initExam()
+    res = exam_item.analyze()
     return jsonify(res)
 
 
-@app.route('/submit_paper/', methods=['post'])
+@app.route('/submit_paper', methods=['post'])
 def submit_paper():
     sum = 0
     data = request.form['answers']
@@ -198,7 +192,7 @@ def submit_paper():
     return str(sum)
 
 
-@app.route('/result/')
+@app.route('/result')
 def result():
     if session.get('user_id'):
         sql = 'select * from user_grade where user_id = %s'

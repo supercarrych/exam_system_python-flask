@@ -29,7 +29,7 @@ class DatabaseHelper:
 
     def get_data(self, table_name, question_id) -> ExamQuestion:
         query = (
-            "SELECT type_desc,question,options,solution,analysis,paper_name,paper_bonus,nth,issues_count,my_solution "
+            "SELECT type, type_desc,question,options,solution,analysis,paper_name,paper_bonus,nth,issues_count,my_solution "
             "FROM {} WHERE id = %s".format(table_name))
 
         cursor = self.connection.cursor(cursor=pymysql.cursors.DictCursor)
@@ -37,7 +37,7 @@ class DatabaseHelper:
 
         result = cursor.fetchone()
         exam = ExamQuestion(
-            question_id, result['type_desc'], result['question'], result['options'], result['solution'],
+            question_id,result['type'], result['type_desc'], result['question'], result['options'], result['solution'],
             result['analysis'], result['paper_name'], result['paper_bonus'], result['nth'],
             result['issues_count'], result['my_solution']
         )
@@ -52,12 +52,14 @@ class DatabaseHelper:
 
     # get all id from table
     def get_all_id(self, table_name):
-        query = (("SELECT id FROM {}").format(table_name))
 
+        query = (("SELECT id FROM {}").format(table_name))
+        print(query)
         cursor = self.connection.cursor()
         cursor.execute(query)
 
         result = cursor.fetchall()
+        print(result)
         cursor.close()
 
         return result
