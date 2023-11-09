@@ -86,7 +86,7 @@ function logoutButton() {
     $('#logout-button').click(function () {
         $.ajax({
             type: 'post',
-            url: 'http://74.120.174.165:5000/logout/',
+            url: 'http://localhost:5000/logout/',
             async: true,
             success: function (data) {
                 if (data['success'] == 1) {
@@ -151,7 +151,7 @@ function login(email, password) {
     })
     $.ajax({
         type: 'post',
-        url: 'http://74.120.174.165:5000/login/',
+        url: 'http://localhost:5000/login/',
         async: true,
         success: function (data) {
             if (data['success'] == 1) {
@@ -180,7 +180,7 @@ function register() {
 
     $.ajax({
         type: 'post',
-        url: 'http://74.120.174.165:5000/register/',
+        url: 'http://localhost:5000/register',
         async: true,
         success: function (data) {
             if (data['success'] == 1) {
@@ -205,7 +205,7 @@ function checkEmail() {
     $('#EmailRegister').bind('change', function () {
         $.ajax({
             type: 'post',
-            url: 'http://74.120.174.165:5000/checkemail/',
+            url: 'http://localhost:5000/checkemail/',
             async: true,
             data: {
                 email: $('#EmailRegister').val()
@@ -230,7 +230,7 @@ function checkEmail() {
 // 检查session判断是否登录了，然后来渲染页面
 // function checkSession() {
 //     $.ajax({
-//         'url':'http://74.120.174.165:5000/checkSession/',
+//         'url':'http://localhost:5000/checkSession/',
 //         type:'post',
 //         async:true,
 //         success:function (data) {
@@ -248,12 +248,12 @@ function checkEmail() {
 function startExam() {
     $('#left-button').click(function () {
         $.ajax({
-            url:'http://74.120.174.165:5000/checkSession/',
+            url:'http://localhost:5000/checkSession/',
             type:'post',
             async: true,
             success:function (data) {
                 if (data['success']==1) {
-                    window.location.href = "http://74.120.174.165:5000/exam/"
+                    window.location.href = "http://localhost:5000/exam/"
                 }else {
                     $('#login-modal').modal('show')
                 }

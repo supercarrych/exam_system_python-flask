@@ -1,20 +1,31 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, g
-from config import cursor, db
+import json
 import os
-from analyze import analyze, initDocx
 import random
-from flask_uploads import configure_uploads,UploadSet,IMAGES
+
+from flask import Flask, render_template, request, jsonify, session
+# from flask_uploads import configure_uploads, UploadSet
+
+from flask_cors import CORS
+from DB import DatabaseHelper
+from analyze import ExamHelper
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
 app.config['SECRET_KEY'] = os.urandom(24)
 
+db = DatabaseHelper()
+cursor = db.get_cursor()
 paper_id = ''
 user_name = ''
 
-app.config['UPLOADS_DEFAULT_DEST'] = 'D:/'   # 这里指定的是 DEFAULT 这个集合里面类型的文件 存放在什么地方
-app.config['UPLOADS_DEFAULT_URL'] = 'http://127.0.0.1/uploadfile/'
-fileSet = UploadSet('docx',)   # 这里指定的是文件夹  D:/file/     extensions=IMAGES 这个参数可以限制上传文件类型，可以从源码里面看
-configure_uploads(app, fileSet)   # 这里是让配置生效
+exam = ExamHelper()
+
+
+# app.config['UPLOADS_DEFAULT_DEST'] = 'D:/'  # 这里指定的是 DEFAULT 这个集合里面类型的文件 存放在什么地方
+# app.config['UPLOADS_DEFAULT_URL'] = 'http://127.0.0.1/uploadfile/'
+# fileSet = UploadSet('docx', )  # 这里指定的是文件夹  D:/file/     extensions=IMAGES 这个参数可以限制上传文件类型，可以从源码里面看
+# configure_uploads(app, fileSet)  # 这里是让配置生效
+
 
 @app.route('/')
 def index():
@@ -34,10 +45,11 @@ def login():
 
         if res:
             result = cursor.fetchone()
+
             data = {
                 'success': 1,
-                'user_id': result.get('id'),
-                'username': result.get('realname'),
+                'user_id': result[0],
+                'username': result[1],
             }
             session['user_id'] = data.get('user_id')
         else:
@@ -59,28 +71,30 @@ def checkEmail():
         return jsonify({'has': 0})
 
 
-@app.route('/register/', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
         return 'GET'
     else:
-        email = request.form['email']
-        exam_id = request.form['exam_id']
-        name = request.form['name']
-        password = request.form['password']
-
-        sql = "insert into users (email, exam_id, realname, password, create_time, update_time) VALUES (%s,%s,%s,%s,now(),now())"
-
         try:
-            res = cursor.execute(sql, (email, exam_id, name, password))
+            email = request.form['email']
+            exam_id = request.form['exam_id']
+            name = request.form['name']
+            password = request.form['password']
+            print(email, exam_id, name, password)
+            sql = "insert into users (email, exam_id, realname, password, create_time, update_time) VALUES (%s,%s,%s,%s,now(),now())"
+
+            cursor.execute(sql, (email, exam_id, name, password))
             db.commit()
+            print('注册成功')
+            form_data = {'success': 1}
+
         except Exception as e:
+            print(e)
             db.rollback()
-            res = None
-        if res:
-            return jsonify({'success': 1})
-        else:
-            return jsonify({'success': 0})
+            form_data = {'success': 0}
+        json_data = json.dumps(form_data)
+        return json_data
 
 
 @app.route('/logout/', methods=['POST'])
@@ -150,7 +164,7 @@ def admin():
 
 @app.route('/analyze/', methods=['post'])
 def analyze_word():
-    res = analyze()
+    res = ExamHelper.analyze()
     return jsonify(res)
 
 
@@ -196,17 +210,17 @@ def result():
         return render_template('temp.html')
 
 
-@app.route('/uploadfile/', methods=['post'])
-def uploadfile():
-    if session.get('user_id'):
-        papaername = request.form.get('papername')
-        if request.method == 'POST' and 'file' in request.files:
-            fileSet.save(request.files['file'], name=papaername + '.docx')
-            initDocx(papaername, papaername)
-            return redirect(url_for('admin'))
-        return '<script>alert("上传失败")</script>'
-    else:
-        return render_template('temp.html')
+# @app.route('/uploadfile/', methods=['post'])
+# def uploadfile():
+#     if session.get('user_id'):
+#         papaername = request.form.get('papername')
+#         if request.method == 'POST' and 'file' in request.files:
+#             fileSet.save(request.files['file'], name=papaername + '.docx')
+#             initDocx(papaername, papaername)
+#             return redirect(url_for('admin'))
+#         return '<script>alert("上传失败")</script>'
+#     else:
+#         return render_template('temp.html')
 
 
 if __name__ == '__main__':
