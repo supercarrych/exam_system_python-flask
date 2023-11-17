@@ -36,8 +36,9 @@ class DatabaseHelper:
         cursor.execute(query, (question_id,))
 
         result = cursor.fetchone()
+        option = eval(result['options'])
         exam = ExamQuestion(
-            question_id,result['type'], result['type_desc'], result['question'], result['options'], result['solution'],
+            question_id,result['type'], result['type_desc'], result['question'], option, result['solution'],
             result['analysis'], result['paper_name'], result['paper_bonus'], result['nth'],
             result['issues_count'], result['my_solution']
         )

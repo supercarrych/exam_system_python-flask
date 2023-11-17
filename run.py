@@ -18,6 +18,7 @@ user_name = ''
 db = DatabaseHelper()
 cursor = db.get_cursor()
 
+
 # app.config['UPLOADS_DEFAULT_DEST'] = 'D:/'  # 这里指定的是 DEFAULT 这个集合里面类型的文件 存放在什么地方
 # app.config['UPLOADS_DEFAULT_URL'] = 'http://127.0.0.1/uploadfile/'
 # fileSet = UploadSet('docx', )  # 这里指定的是文件夹  D:/file/     extensions=IMAGES 这个参数可以限制上传文件类型，可以从源码里面看
@@ -26,7 +27,6 @@ cursor = db.get_cursor()
 
 @app.route('/')
 def index():
-
     return render_template('index.html')
 
 
@@ -119,10 +119,11 @@ def exam():
     print(session.get('user_id'))
     session['user_id'] = '8'
     if session.get('user_id'):
-        items = db.get_all_id(table_name='question')
+        items = db.get_all_id(table_name='test')
         questions = []
+
         for i in items:
-            items = db.get_data('question', i)
+            items = db.get_data('test', i)
             questions.append(items.to_dict())
 
         return render_template('exam.html', question=questions)
