@@ -1,8 +1,12 @@
+import base64
+import io
 import json
+
 import os
 import random
 from datetime import timedelta
 
+from PIL import Image
 from flask import Flask, render_template, request, jsonify, session
 # from flask_uploads import configure_uploads, UploadSet
 
@@ -17,7 +21,7 @@ paper_id = ''
 user_name = ''
 db = DatabaseHelper()
 cursor = db.get_cursor()
-
+table_name = 'test'
 
 # app.config['UPLOADS_DEFAULT_DEST'] = 'D:/'  # 这里指定的是 DEFAULT 这个集合里面类型的文件 存放在什么地方
 # app.config['UPLOADS_DEFAULT_URL'] = 'http://127.0.0.1/uploadfile/'
@@ -119,16 +123,38 @@ def exam():
     print(session.get('user_id'))
     session['user_id'] = '8'
     if session.get('user_id'):
-        items = db.get_all_id(table_name='test')
+        items = db.get_all_id(table_name)
         questions = []
 
         for i in items:
-            items = db.get_data('test', i)
+            items = db.get_data(table_name, i)
+            save_path = 'static/question/{}.png'.format(items.id[0])
+            if not os.path.exists(save_path):
+                img = base64.b64decode(items.image)
+                file = io.BytesIO(img)
+                img = Image.open(file)
+                img.save(save_path)
+            items.image = save_path
+            items.id = items.id[0]
             questions.append(items.to_dict())
 
         return render_template('exam.html', question=questions)
     else:
         return render_template('temp.html')
+
+
+@app.route('/update_question', methods=['POST'])
+def update_question():
+    question = request.form['question']
+    questionId = request.form['id']
+    # 在这里进行问题更新的逻辑处理
+    if db.update_question(table_name, questionId, question):
+        return jsonify({'success': 1})
+
+    print(questionId)
+    print(question)
+
+    return jsonify({'success': 0})
 
 
 @app.context_processor

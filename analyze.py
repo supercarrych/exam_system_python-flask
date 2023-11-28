@@ -6,7 +6,7 @@ import pymysql
 
 from exam import ExamQuestion
 
-table_name = 'question'
+table_name = 'test'
 
 
 class ExamHelper:

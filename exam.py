@@ -7,7 +7,7 @@
 # @Description :
 class ExamQuestion:
 
-    def __init__(self, id, type, type_desc, question, options, solution, analysis, paper_name, paper_bonus, nth, issues_count, my_solution):
+    def __init__(self, id, type, type_desc, question, options, solution, analysis, paper_name, paper_bonus, nth, issues_count, my_solution,image):
         self.id = id
         self.type = type
         self.type_desc = type_desc
@@ -20,7 +20,7 @@ class ExamQuestion:
         self.nth = nth
         self.issues_count = issues_count
         self.my_solution = my_solution
-
+        self.image = image
     # 返回字典
     def to_dict(self):
         return {
@@ -35,7 +35,8 @@ class ExamQuestion:
             'paper_bonus': self.paper_bonus,
             'nth': self.nth,
             'issues_count': self.issues_count,
-            'my_solution': self.my_solution
+            'my_solution': self.my_solution,
+            'image': self.image
         }
 
     # 设置id

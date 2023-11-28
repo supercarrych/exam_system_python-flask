@@ -29,7 +29,7 @@ class DatabaseHelper:
 
     def get_data(self, table_name, question_id) -> ExamQuestion:
         query = (
-            "SELECT type, type_desc,question,options,solution,analysis,paper_name,paper_bonus,nth,issues_count,my_solution "
+            "SELECT type, type_desc,question,options,solution,analysis,paper_name,paper_bonus,nth,issues_count,my_solution,image "
             "FROM {} WHERE id = %s".format(table_name))
 
         cursor = self.connection.cursor(cursor=pymysql.cursors.DictCursor)
@@ -38,14 +38,29 @@ class DatabaseHelper:
         result = cursor.fetchone()
         option = eval(result['options'])
         exam = ExamQuestion(
-            question_id,result['type'], result['type_desc'], result['question'], option, result['solution'],
+            question_id, result['type'], result['type_desc'], result['question'], option, result['solution'],
             result['analysis'], result['paper_name'], result['paper_bonus'], result['nth'],
-            result['issues_count'], result['my_solution']
+            result['issues_count'], result['my_solution'], result['image']
         )
 
         cursor.close()
 
         return exam
+
+    # 根据id修改题目的question
+    def update_question(self, table_name, question_id, question) -> bool:
+        try:
+            query = ("UPDATE {} SET question = '{}' WHERE id = {}".format(table_name, question, question_id))
+            print(query)
+            cursor = self.connection.cursor()
+            cursor.execute(query)
+            self.connection.commit()
+            cursor.close()
+            return True
+        except Exception as e:
+            print(e)
+            return False
+
 
     def disconnect(self):
         if self.connection:
@@ -85,8 +100,7 @@ class DatabaseHelper:
     # cursor = db.cursor(cursor=pymysql.cursors.DictCursor)
     # cursor_exam = db2.cursor(cursor=pymysql.cursors.DictCursor)
     def commit(self):
-        return self.connection.commit()    # db.commit()
+        return self.connection.commit()  # db.commit()
 
     def rollback(self):
-        return self.connection.rollback()    # db.rollback()
-
+        return self.connection.rollback()  # db.rollback()

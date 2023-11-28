@@ -171,6 +171,8 @@ function login(email, password) {
 }
 
 
+
+
 // 注册账号
 function register() {
     var email = $('#EmailRegister').val()

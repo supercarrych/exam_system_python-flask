@@ -112,13 +112,19 @@
 
     <div class="p-3 mb-2 bg-info text-white rounded">
         {{q.nth}}/{{q.issues_count}}<br>
-        <img src="{{q.imageUrl}}"><br>
-        <form action="url地址" method="post" name="question">
-            <textarea >{{ q.question }} </textarea><br>
+        <div id="image-container{{ loop.index }}"></div>
+        <script>
+            // 调用getImage函数并传递图像路径和容器ID
+        getImage('{{ q.image }}', 'image-container{{ loop.index }}');
+        </script>
+
+        <form action="##" onsubmit="return false">
+            <textarea itemid="{{q.id}}" id="itemid">{{ q.question }} </textarea><br>
+            <input class="question" onclick="submit_question()"  type="button" value="提交"><br>
         </form>
-        <input class="question" name="question" type="button" value="提交"><br>
+
         {{q.options.A}} <br>
-       {{q.options.B}}<br>
+        {{q.options.B}}<br>
         {{q.options.C}}<br>
         {{q.options.D}} <br>
         <br>
@@ -126,44 +132,16 @@
     </div>
     {{q.solution}}
     <br>
-    <form action="url地址" method="post" name="analysis">
-       <textarea >{{ q.analysis }} </textarea><br>
+    <form action="http://localhost:5000/update_analyze" method="post" name="analysis">
+        <textarea>{{ q.analysis }} </textarea><br>
+        <input class="analysis" name="analysis" type="button" value="提交"><br>
     </form>
-     <input class="analysis" name="analysis" type="button" value="提交"><br>
+
     {% endif %}
 
     {% endfor %}
-    <hr>
-    <strong>
-        二、多项选择题(本类题共 12 小题，每小题 2 分，共 24 分，每小题备选答案中，有二个或 二个以上符合题意的正确答案，多选，少选，错选，不选均不得分。)
-    </strong>
-    {% for q in question %}
-    {% if q.get('q_type')=='checkbox' %}
-    <div class="p-3 mb-2 bg-info text-white rounded">
-        <p>{{ q.q_text }}</p>
-        <input type="checkbox" name="{{ q.id }}" value="A"> {{ q.A }} <br>
-        <input type="checkbox" name="{{ q.id }}" value="B"> {{ q.B }} <br>
-        <input type="checkbox" name="{{ q.id }}" value="C"> {{ q.C }} <br>
-        <input type="checkbox" name="{{ q.id }}" value="D"> {{ q.D }} <br>
-        <br>
-    </div>
-    {% endif %}
-    {% endfor %}
-    <hr>
-    <strong>
-        三、判断题(本类题共 10 小题，每小题 1 分，共 10 分。请判断每小题的表述是否正确，每小题答题正确的得 1 分，答题错误的扣
-        0.5分，不答题的不得分也不扣分，本类题最低得分0分。)
-    </strong>
-    {% for q in question %}
-    {% if q.get('q_type')=='decide' %}
-    <div class="p-3 mb-2 bg-info text-white rounded">
-        <p>{{ q.q_text }}</p>
-        <input type="radio" name="{{ q.id }}" value="1"> 对 <br>
-        <input type="radio" name="{{ q.id }}" value="0"> 错 <br>
-        <br>
-    </div>
-    {% endif %}
-    {% endfor %}
+
+
 </div>
 
 {% else %}
