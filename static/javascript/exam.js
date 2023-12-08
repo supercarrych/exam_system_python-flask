@@ -1,26 +1,47 @@
-// 提交试卷提示框
-function submit() {
-    $('#submit').click(function () {
-        $('#submit_modal').modal('show')
-    })
-}
 
 
-// 放弃考试提示框
-function giveup() {
-    $('#give_up').click(function () {
-        $('#giveup_modal').modal('show')
-    })
-}
 
-function giveupbutton() {
-    $('#giveup_button').click(function () {
-        window.location.href = "http://74.120.174.165:5000"
-    })
-}
+    // 获取选择的答案
+function submit_question(button) {
+
+            var form = button.parentNode;
+            var question_input =  document.getElementById("itemid"+form.id);
+
+            var question = question_input.value;
+            var id = form.id;
 
 
-    function getImage(img_path, containerId) {
+            var tableName =  document.getElementById("personalcenter");
+
+
+            $.ajax({
+                url:'http://localhost:5000/update_question',
+                type:'post',
+                async: true,
+                data:{
+                    'id':id,
+                    'question':question,
+                    'tableName':tableName.textContent
+                },
+                success:function (res) {
+                    console.log(res)
+                    if (res['success'] == 1) {
+                        alert('修改成功')
+
+                    } else {
+                        alert('修改失败')
+                    }
+                },
+                error:function () {
+                    alert('修改失败')
+                }
+
+            });
+
+  }
+
+
+function getImage(img_path, containerId) {
               // 创建XMLHttpRequest对象
               var xhr = new XMLHttpRequest();
 
@@ -48,48 +69,4 @@ function giveupbutton() {
 
               // 发送请求
               xhr.send();
-    }
-
-
-
-    // 获取选择的答案
-function submit_question() {
-
-
-            var question_input =  document.getElementById("itemid");
-
-            var question = question_input.value;
-
-            var id = question_input.getAttribute("itemid");
-
-            $.ajax({
-                url:'http://localhost:5000/update_question',
-                type:'post',
-                async: true,
-                data:{
-                    'id':id,
-                    'question':question
-                },
-                success:function (res) {
-                    console.log(res)
-                    if (res['success'] == 1) {
-                        alert('修改成功')
-
-                    } else {
-                        alert('修改失败')
-                    }
-                },
-                error:function () {
-                    alert('修改失败')
-                }
-
-            });
-
-    }
-
-
-$(document).ready(function () {
-    submit()
-    giveup()
-    giveupbutton()
-})
+ }

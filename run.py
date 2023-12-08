@@ -21,7 +21,7 @@ paper_id = ''
 user_name = ''
 db = DatabaseHelper()
 cursor = db.get_cursor()
-table_name = 'test'
+
 
 # app.config['UPLOADS_DEFAULT_DEST'] = 'D:/'  # 这里指定的是 DEFAULT 这个集合里面类型的文件 存放在什么地方
 # app.config['UPLOADS_DEFAULT_URL'] = 'http://127.0.0.1/uploadfile/'
@@ -118,16 +118,21 @@ def checkSession():
     return jsonify({'success': 0})
 
 
-@app.route('/exam')
+@app.route('/exam', methods=['GET'])
 def exam():
-    print(session.get('user_id'))
     session['user_id'] = '8'
     if session.get('user_id'):
+        table_name = request.args.get('tableName')
+        if table_name == "":
+            table_name = 'test'
+        else:
+            table_name = table_name
         items = db.get_all_id(table_name)
         questions = []
 
         for i in items:
             items = db.get_data(table_name, i)
+            print(items.id[0])
             save_path = 'static/question/{}.png'.format(items.id[0])
             if not os.path.exists(save_path):
                 img = base64.b64decode(items.image)
@@ -138,7 +143,11 @@ def exam():
             items.id = items.id[0]
             questions.append(items.to_dict())
 
-        return render_template('exam.html', question=questions)
+        tableName = db.getTableName()
+        newTableName = []
+        for t in tableName:
+            newTableName.append(t[0])
+        return render_template('exam.html', question=questions, tableName=newTableName, currentTableName=table_name)
     else:
         return render_template('temp.html')
 
@@ -147,8 +156,11 @@ def exam():
 def update_question():
     question = request.form['question']
     questionId = request.form['id']
+    tableName = request.form['tableName']
+    if tableName is "":
+        return jsonify({'success': 0})
     # 在这里进行问题更新的逻辑处理
-    if db.update_question(table_name, questionId, question):
+    if db.update_question(tableName, questionId, question):
         return jsonify({'success': 1})
 
     print(questionId)
@@ -187,36 +199,6 @@ def analyze_word():
     exam_item.initExam()
     res = exam_item.analyze()
     return jsonify(res)
-
-
-@app.route('/submit_paper', methods=['post'])
-def submit_paper():
-    sum = 0
-    data = request.form['answers']
-    # for i in range(1,47):
-    #     if (dict(data).get('{}'.format(i))):
-    #         print(data[i])
-    dict_data = dict(eval(data))
-    for i in range(1, 46 * paper_id + 1):
-        if dict_data.get('{}'.format(i)):
-            sql = 'select id,answer,q_value from questions where id = %s and paper_id = %s'
-            cursor.execute(sql, (i, paper_id))
-            database = cursor.fetchone()
-            trueAnswer = database.get('answer')
-            yourAnser = dict_data.get('{}'.format(i))
-            if trueAnswer == yourAnser:
-                sum = sum + float(database.get('q_value'))
-                # print('{}'.format(i),cursor.fetchone().get('answer'),dict_data.get('{}'.format(i)))
-
-    sql = 'select * from docx where id = %s'
-    cursor.execute(sql, (paper_id,))
-    temp = cursor.fetchone()
-    paper_name = temp.get('paper_name')
-
-    sql = 'insert into user_grade (user_id, paper_id, exam_grade, create_time, paper_name,user_name) values (%s,%s,%s,now(), %s, %s)'
-    cursor.execute(sql, (session.get('user_id'), paper_id, sum, paper_name, user_name))
-    db.commit()
-    return str(sum)
 
 
 @app.route('/result')

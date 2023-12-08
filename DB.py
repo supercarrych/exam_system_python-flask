@@ -66,6 +66,15 @@ class DatabaseHelper:
         if self.connection:
             self.connection.close()
 
+
+    def getTableName(self):
+        sql = 'show tables'
+        cursor = self.connection.cursor()
+        cursor.execute(sql)
+        tableName = cursor.fetchall()
+        cursor.close()
+        return tableName
+
     # get all id from table
     def get_all_id(self, table_name):
 
