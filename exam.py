@@ -7,35 +7,13 @@
 # @Description :
 class ExamQuestion:
 
-    def __init__(self, id, type, type_desc, question, options, solution, analysis, paper_name, paper_bonus, nth, issues_count, my_solution,image):
+    def __init__(self, id,image):
         self.id = id
-        self.type = type
-        self.type_desc = type_desc
-        self.question = question
-        self.options = options
-        self.solution = solution
-        self.analysis = analysis
-        self.paper_name = paper_name
-        self.paper_bonus = paper_bonus
-        self.nth = nth
-        self.issues_count = issues_count
-        self.my_solution = my_solution
         self.image = image
     # 返回字典
     def to_dict(self):
         return {
             'id': self.id,
-            'type': self.type,
-            'type_desc': self.type_desc,
-            'question': self.question,
-            'options': self.options,
-            'solution': self.solution,
-            'analysis': self.analysis,
-            'paper_name': self.paper_name,
-            'paper_bonus': self.paper_bonus,
-            'nth': self.nth,
-            'issues_count': self.issues_count,
-            'my_solution': self.my_solution,
             'image': self.image
         }
 

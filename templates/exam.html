@@ -35,7 +35,7 @@
                         </button>
                         <div class="dropdown-menu">
                            {% for t in tableName %}
-                            <a class="dropdown-item" href="http://localhost:5000/exam?tableName={{t}}">{{t}}</a>
+                            <a class="dropdown-item" href="http://localhost:3000/exam?tableName={{t}}">{{t}}</a>
                              {% endfor %}
                         </div>
                     </div>
@@ -48,31 +48,30 @@
 
 
 
-{% if name %}
+
 <div class="exam">
     <strong>一、单项选择题(本类题共 24 小题，每小题 1.5 分，共 36
         分。每小题备选答案中，只有一个符合题意的正确答案。多选、错选、不选均不得分。)</strong>
 
     {% for q in question %}
-    {% if q.type==1 %}
+
 
     <div class="p-3 mb-2 bg-info text-white rounded">
-        {{q.nth}}/{{q.issues_count}}<br>
-<!--        <div id="image-container{{ loop.index }}"></div>-->
-<!--        <script>-->
-<!--            // 调用getImage函数并传递图像路径和容器ID-->
-<!--        getImage('{{ q.image }}', 'image-container{{ loop.index }}');-->
-<!--        </script>-->
+        {{q.nth}}<br>
+        <div id="image-container{{ loop.index }}"></div>
+        <script>
+            // 调用getImage函数并传递图像路径和容器ID
+        getImage('{{ q.image }}', 'image-container{{ loop.index }}');
+        </script>
 
-        <form id="{{q.id}}" action="##" onsubmit="return false">
-            <textarea itemid="{{q.id}}" id="itemid{{q.id}}">{{ q.question }} </textarea><br>
+        <form id="{{q.question_id}}" action="##" onsubmit="return false">
+            <textarea itemid="{{q.question_id}}" id="itemid{{q.question_id}}">{{ q.question }} </textarea><br>
             <input class="question" onclick="submit_question(this)"  type="button" value="提交"><br>
         </form>
 
-        {{q.options.A}} <br>
-        {{q.options.B}}<br>
-        {{q.options.C}}<br>
-        {{q.options.D}} <br>
+        {% for option in q.options %}
+        {{option.code}}:{{option.option}} <br>
+        {% endfor %}
         <br>
 
     </div>
@@ -83,30 +82,13 @@
         <input class="analysis" name="analysis" type="button" value="提交"><br>
     </form>
 
-    {% endif %}
+
 
     {% endfor %}
 
 
 </div>
 
-{% else %}
-<script>
-    $('#my-navbar').removeClass('fixed-top')
-</script>
-<div class="container" style="margin-top: 30px">
-    <div class="jumbotron">
-        <h1 class="display-3">请先登录</h1>
-        <p class="lead">Don't access this page by URL, please retrun index page</p>
-        <small>Login first</small>
-        <hr class="my-4">
-        <p>It uses utility classes for typography and spacing to space content out within the larger
-            container.</p>
-        <p class="lead">
-            <a class="btn btn-primary btn-lg" href="{{ url_for('index') }}" role="button">返回首页</a>
-        </p>
-    </div>
-</div>
-{% endif %}
+
 </body>
 {% endblock %}

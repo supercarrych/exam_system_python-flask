@@ -6,16 +6,14 @@ function submit_question(button) {
 
             var form = button.parentNode;
             var question_input =  document.getElementById("itemid"+form.id);
-
+            if (question_input !== null) {
             var question = question_input.value;
             var id = form.id;
 
-
             var tableName =  document.getElementById("personalcenter");
 
-
             $.ajax({
-                url:'http://localhost:5000/update_question',
+                url:'http://localhost:3000/update_question',
                 type:'post',
                 async: true,
                 data:{
@@ -24,7 +22,7 @@ function submit_question(button) {
                     'tableName':tableName.textContent
                 },
                 success:function (res) {
-                    console.log(res)
+
                     if (res['success'] == 1) {
                         alert('修改成功')
 
@@ -37,6 +35,9 @@ function submit_question(button) {
                 }
 
             });
+            } else{
+                 console.error('inputElement is null!');
+            }
 
   }
 

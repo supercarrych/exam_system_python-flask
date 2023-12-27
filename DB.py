@@ -1,5 +1,5 @@
 import pymysql
-
+import requests
 from exam import ExamQuestion
 
 db_host = '112.74.47.53'
@@ -23,29 +23,36 @@ class DatabaseHelper:
             charset='utf8mb4'
         )
 
+    def __exit__(self):
+        self.connection.__exit__()
+
     # return cursor object
     def get_cursor(self):
         return self.connection.cursor()
 
     def get_data(self, table_name, question_id) -> ExamQuestion:
-        query = (
-            "SELECT type, type_desc,question,options,solution,analysis,paper_name,paper_bonus,nth,issues_count,my_solution,image "
-            "FROM {} WHERE id = %s".format(table_name))
+        # query = (
+        #     "SELECT image "
+        #     "FROM {} WHERE id = %s".format(table_name))
+        #
+        # cursor = self.connection.cursor(cursor=pymysql.cursors.DictCursor)
+        # cursor.execute(query, (question_id,))
+        #
+        # result = cursor.fetchone()
+        # exam = ExamQuestion(question_id, result['image'])
+        #
+        # cursor.close()
+        url = 'http://127.0.0.1:5000/web/api/getImage'
+        json = {
+            "question_id": question_id,
+            "table_name": table_name
+        }
 
-        cursor = self.connection.cursor(cursor=pymysql.cursors.DictCursor)
-        cursor.execute(query, (question_id,))
-
-        result = cursor.fetchone()
-        option = eval(result['options'])
-        exam = ExamQuestion(
-            question_id, result['type'], result['type_desc'], result['question'], option, result['solution'],
-            result['analysis'], result['paper_name'], result['paper_bonus'], result['nth'],
-            result['issues_count'], result['my_solution'], result['image']
-        )
-
-        cursor.close()
-
-        return exam
+        response = requests.post(url=url, json=json)
+        res_json = response.json()
+        res_json = res_json['data']
+        res_json = res_json['result']
+        return res_json['image_base_64']
 
     # 根据id修改题目的question
     def update_question(self, table_name, question_id, question) -> bool:
@@ -61,11 +68,9 @@ class DatabaseHelper:
             print(e)
             return False
 
-
     def disconnect(self):
         if self.connection:
             self.connection.close()
-
 
     def getTableName(self):
         sql = 'show tables'
@@ -73,41 +78,37 @@ class DatabaseHelper:
         cursor.execute(sql)
         tableName = cursor.fetchall()
         cursor.close()
-        return tableName
+        newTableName = []
+        for t in tableName:
+            newTableName.append(t[0])
+        return newTableName
 
     # get all id from table
     def get_all_id(self, table_name):
 
-        query = (("SELECT id FROM {}").format(table_name))
-        print(query)
-        cursor = self.connection.cursor()
-        cursor.execute(query)
+        url = 'http://112.74.47.53:5000/api/login'
+        json = {
+            "open_id": "1231asd"
+        }
 
-        result = cursor.fetchall()
-        print(result)
-        cursor.close()
+        response = requests.post(url=url, json=json)
 
-        return result
+        res_json = response.json()
+        print(res_json['data'])
+        data = res_json['data']
+        auth = str(data['userToken'])
 
-    # db = pymysql.connect(
-    #     host='112.74.47.53',
-    #     port=3306,
-    #     db='db_exam',
-    #     user='db_exam',
-    #     password='ch5023429',
-    #     charset='utf8mb4'
-    # )
-    # db2 = pymysql.connect(
-    #     host='112.74.47.53',
-    #     port=3306,
-    #     db='wechat',
-    #     user='wechat',
-    #     password='ch123456',
-    #     charset='utf8mb4'
-    # )
-    #
-    # cursor = db.cursor(cursor=pymysql.cursors.DictCursor)
-    # cursor_exam = db2.cursor(cursor=pymysql.cursors.DictCursor)
+        headers = {
+            'Authorization': 'Bearer {}'.format(auth),
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Mobile Safari/537.36'
+        }
+        url = "http://127.0.0.1:5000/web/api/question/get/{}".format(table_name)
+        print(url)
+        response = requests.get(url=url, headers=headers)  # 三个参数
+        ctx_json = response.json()
+        print(ctx_json['data'])
+        return ctx_json['data']
+
     def commit(self):
         return self.connection.commit()  # db.commit()
 

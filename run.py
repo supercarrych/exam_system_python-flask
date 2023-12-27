@@ -118,38 +118,43 @@ def checkSession():
     return jsonify({'success': 0})
 
 
+tableName = db.getTableName()
+
+
 @app.route('/exam', methods=['GET'])
 def exam():
-    session['user_id'] = '8'
-    if session.get('user_id'):
-        table_name = request.args.get('tableName')
-        if table_name == "":
-            table_name = 'test'
-        else:
-            table_name = table_name
-        items = db.get_all_id(table_name)
-        questions = []
-
-        for i in items:
-            items = db.get_data(table_name, i)
-            print(items.id[0])
-            save_path = 'static/question/{}.png'.format(items.id[0])
-            if not os.path.exists(save_path):
-                img = base64.b64decode(items.image)
-                file = io.BytesIO(img)
-                img = Image.open(file)
-                img.save(save_path)
-            items.image = save_path
-            items.id = items.id[0]
-            questions.append(items.to_dict())
-
-        tableName = db.getTableName()
-        newTableName = []
-        for t in tableName:
-            newTableName.append(t[0])
-        return render_template('exam.html', question=questions, tableName=newTableName, currentTableName=table_name)
+    table_name = request.args.get('tableName')
+    if table_name is None:
+        table_name = 'test'
     else:
-        return render_template('temp.html')
+        table_name = table_name
+    items = db.get_all_id(table_name)
+    allQuestion = items['result']
+    questions = []
+    i = 1
+    for value in allQuestion:
+        value['nth'] = i
+        i += 1
+        try:
+            d = json.loads(value['options'])
+            value['options'] = d
+        except json.JSONDecodeError:
+            print("Invalid JSON string")
+
+        save_path = 'static/question/{}.png'.format(value['question_id'])
+        if not os.path.exists(save_path):
+            print("save")
+            image = db.get_data(table_name, value['question_id'])
+            img = base64.b64decode(image)
+            file = io.BytesIO(img)
+            img = Image.open(file)
+            img.save(save_path)
+        value['image'] = save_path
+
+        print(value)
+        questions.append(value)
+
+    return render_template('exam.html', question=questions, tableName=tableName, currentTableName=table_name)
 
 
 @app.route('/update_question', methods=['POST'])
@@ -157,7 +162,7 @@ def update_question():
     question = request.form['question']
     questionId = request.form['id']
     tableName = request.form['tableName']
-    if tableName is "":
+    if tableName == "":
         return jsonify({'success': 0})
     # 在这里进行问题更新的逻辑处理
     if db.update_question(tableName, questionId, question):
@@ -227,4 +232,4 @@ def result():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, threaded=True, )
+    app.run(debug=True, threaded=True, port=3000)
